@@ -1,11 +1,18 @@
 <?php
 include("contact.php");
-extract($_POST);
-$sql = "INSERT INTO `contact-data`(`firstname`, `lastname`, `phone`, `email`, `messages`) VALUES ('".$firstname."','".$lastname."',".$phone.",'".$email."','".$messages."')";
-$result = $mysqli->query($sql);
-if(!$result){
-    die("Couldn't enter data: ".$mysqli->error);
+
+$firstname = $_POST['firstname'] ?? '';
+$lastname = $_POST['lastname'] ?? '';
+$phone = $_POST['phone'] ?? '';
+$email = $_POST['email'] ?? '';
+$messages = $_POST['messages'] ?? '';
+
+$stmt = $mysqli->prepare("INSERT INTO `contact-data` (`firstname`, `lastname`, `phone`, `email`, `messages`) VALUES (?, ?, ?, ?, ?)");
+$stmt->bind_param("sssss", $firstname, $lastname, $phone, $email, $messages);
+if (!$stmt->execute()) {
+    die("Couldn't enter data: " . $stmt->error);
 }
+$stmt->close();
 header("location: home.php");
 $mysqli->close();
 ?>
