@@ -1,4 +1,5 @@
 <?php
+// redeploy-trigger
 header('Content-Type: text/plain');
 
 function mask($v) {
