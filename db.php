@@ -27,8 +27,15 @@
     }
 
     if ($db_ssl_ca) {
+        // mysqli_ssl_set() expects a file path for the CA certificate, not
+        // inline PEM content -- write the env var's content to disk once
+        // per container and point it there.
+        $ca_path = sys_get_temp_dir() . '/db-ca.pem';
+        if (!file_exists($ca_path) || file_get_contents($ca_path) !== $db_ssl_ca) {
+            file_put_contents($ca_path, $db_ssl_ca);
+        }
         $conn = mysqli_init();
-        mysqli_ssl_set($conn, NULL, NULL, $db_ssl_ca, NULL, NULL);
+        mysqli_ssl_set($conn, NULL, NULL, $ca_path, NULL, NULL);
         $conn->real_connect($db_host, $db_user, $db_pass, $db_name, $db_port, NULL, MYSQLI_CLIENT_SSL);
     } else {
         $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
